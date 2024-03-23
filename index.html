@@ -1,0 +1,215 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snake Game</title>
+<style>
+body{
+background-image:url("https://i.pinimg.com/originals/3f/28/d0/3f28d0af9f17c0e4e38c837513145e4d.jpg");
+background-repeat: no-repeat;
+background-attachment: fixed;
+background-size: 100% 100%;
+
+}
+
+canvas {
+border: 10px solid white;
+display: block;
+margin: 20px auto;
+}
+
+h1 {
+font-size: 48px; /* Adjust the font size as needed /
+position: relative; / To use absolute positioning for the span /
+line-height: 1.5; / Adjust line height for better readability */
+text-align:center;
+transform: rotate(-5deg);
+transform-origin: left top;
+
+}
+body {
+margin: 0;
+padding: 0;
+height: 100vh;
+background-size: cover;
+background-position: center;
+transition: background-image 0.5s ease-in-out;
+}
+
+    .image-container {
+        display:inline;
+        justify-content: space-around;
+        align-items: center;
+       
+        overflow: hidden;
+    }
+
+    .image-container img {
+        width: 100px;
+        height: 100px;
+        cursor: pointer;
+        border-radius: 50%;
+
+        transition: transform 0.2s ease-in-out;
+    }
+    .image-container img:hover {
+        transform: scale(1.1);
+    }
+</style>
+
+</head>
+<body>
+<table>
+<tr>
+<td>
+
+<table width="100%">
+<tr>
+  <td width="10%"  style="color:white; border: 10px solid;">
+  <div class="image-container" style="border: 50px;">
+    <img src="https://i.pinimg.com/originals/3f/28/d0/3f28d0af9f17c0e4e38c837513145e4d.jpg" onclick="changeBackground('https://i.pinimg.com/originals/3f/28/d0/3f28d0af9f17c0e4e38c837513145e4d.jpg')" alt="Image 1"><br>
+    <img src="https://img.cadnav.com/allimg/170522/cadnav-1F522233922.jpg" onclick="changeBackground('https://img.cadnav.com/allimg/170522/cadnav-1F522233922.jpg')" alt="Image 1"><br>
+    <img src='https://i.pinimg.com/736x/17/a1/0b/17a10beef9d0989e270a3e1e88e7c4a2.jpg' onclick="changeBackground('https://i.pinimg.com/736x/17/a1/0b/17a10beef9d0989e270a3e1e88e7c4a2.jpg')" alt="Image 2"><br>
+<img src='https://i.pinimg.com/736x/d7/5a/a9/d75aa96c6b0cf6f9b94ec14b8c056c7a.jpg' onclick="changeBackground('https://i.pinimg.com/736x/d7/5a/a9/d75aa96c6b0cf6f9b94ec14b8c056c7a.jpg')" alt="Image 4">
+<img src='https://img.goodfon.com/wallpaper/big/1/9d/kobra-zmeia-tsvetok.webp' onclick="changeBackground('https://img.goodfon.com/wallpaper/big/1/9d/kobra-zmeia-tsvetok.webp')" alt="Image 4">
+
+</div>
+</td>
+<td width="90%">
+<center>
+<h1 style="color: #7a649d;">Snake Game</h1>
+<canvas id="snakeCanvas" width="700" height="400">
+</canvas>
+</td>
+</tr>
+</table>
+<script>function changeBackground(imageUrl) {
+document.body.style.backgroundImage = url(${imageUrl});
+}
+</script>
+<script>
+// Set up the canvas
+const canvas = document.getElementById("snakeCanvas");
+const ctx = canvas.getContext("2d");
+
+// Set the size of each grid cell
+const boxSize = 20;
+
+// Initialize the snake
+let snake = [];
+snake[0] = { x: 10 * boxSize, y: 10 * boxSize };
+
+// Initialize the food
+let food = {
+x: Math.floor(Math.random() * 20) * boxSize,
+y: Math.floor(Math.random() * 20) * boxSize
+};
+
+// Initialize the score
+let score = 0;
+
+// Store the direction of the snake
+let d;
+
+// Listen for arrow key presses
+document.addEventListener("keydown", direction);
+
+function direction(event) {
+if (event.keyCode == 37 && d != "RIGHT") {
+d = "LEFT";
+} else if (event.keyCode == 38 && d != "DOWN") {
+d = "UP";
+} else if (event.keyCode == 39 && d != "LEFT") {
+d = "RIGHT";
+} else if (event.keyCode == 40 && d != "UP") {
+d = "DOWN";
+}
+}
+
+// Draw everything on the canvas
+function draw() {
+// Clear the canvas
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+// Draw the snake
+for (let i = 0; i < snake.length; i++) {
+    ctx.fillStyle = i === 0 ? "#00ffff" : "black";
+    ctx.fillRect(snake[i].x, snake[i].y, boxSize, boxSize);
+
+    ctx.strokeStyle = "black";
+    ctx.strokeRect(snake[i].x, snake[i].y, boxSize, boxSize);
+}
+
+// Draw the food
+ctx.fillStyle = "green";
+ctx.fillRect(food.x, food.y, boxSize, boxSize);
+
+// Move the snake
+let snakeX = snake[0].x;
+let snakeY = snake[0].y;
+
+if (d === "LEFT") snakeX -= boxSize;
+if (d === "UP") snakeY -= boxSize;
+if (d === "RIGHT") snakeX += boxSize;
+if (d === "DOWN") snakeY += boxSize;
+
+// Check for collisions with the food
+if (snakeX === food.x && snakeY === food.y) {
+    score++;
+    food = {
+        x: Math.floor(Math.random() * 20) * boxSize,
+        y: Math.floor(Math.random() * 20) * boxSize
+    };
+} else {
+    // Remove the tail of the snake if no food is eaten
+    snake.pop();
+}
+
+// Create a new head for the snake
+const newHead = {
+    x: snakeX,
+    y: snakeY
+};
+
+// Check for collisions with the canvas borders or itself
+if (
+    snakeX < 0 ||
+    snakeY < 0 ||
+    snakeX >= canvas.width ||
+    snakeY >= canvas.height ||
+    collision(newHead, snake)
+) {
+    clearInterval(game);
+    alert("Game Over! Your score is " + score);
+    location.reload(); // Reload the page to restart the game
+}
+
+// Add the new head to the snake
+snake.unshift(newHead);
+
+// Display the score
+ctx.fillStyle = "#7a649d";
+ctx.font = "20px Arial";
+ctx.fillText("Score: " + score, boxSize, boxSize);
+}
+
+// Check for collisions with the snake itself
+function collision(head, array) {
+for (let i = 0; i < array.length; i++) {
+if (head.x === array[i].x && head.y === array[i].y) {
+return true;
+}
+}
+return false;
+}
+
+// Run the draw function every 150 milliseconds
+const game = setInterval(draw, 150);
+</script>
+<script>
+    function changeBackground(imageUrl) {
+        document.body.style.backgroundImage = `url(${imageUrl})`;
+    }
+</script>
+</body>
+</html>
